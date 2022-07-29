@@ -1,0 +1,82 @@
+From f23c71da938452cb42d4c0bfaef087afc26db82e Mon Sep 17 00:00:00 2001
+From: Olivier XILLO <oxillo@users.noreply.github.com>
+Date: Mon, 13 Apr 2020 19:36:02 +0200
+Subject: [PATCH] Merge make43 msys2ccache (#6566)
+
+[changelog] [makefiles]
+---
+ .appveyor.yml                                         | 11 -----------
+ .../project/makefileCommon/config.addons.mk           |  2 +-
+ scripts/ci/ccache.sh                                  |  8 +++++---
+ scripts/ci/msys2/build.sh                             |  6 +++---
+ scripts/ci/msys2/run_tests.sh                         |  2 +-
+ 5 files changed, 10 insertions(+), 19 deletions(-)
+
+diff --git a/libs/openFrameworksCompiled/project/makefileCommon/config.addons.mk b/libs/openFrameworksCompiled/project/makefileCommon/config.addons.mk
+index 1566d47eba7..4b38a3dd8cd 100644
+--- a/libs/openFrameworksCompiled/project/makefileCommon/config.addons.mk
++++ b/libs/openFrameworksCompiled/project/makefileCommon/config.addons.mk
+@@ -96,7 +96,7 @@ define parse_addon
+ 	$(eval ADDON_SOURCES=$(PARSED_ADDONS_SOURCE_FILES)) \
+ 	$(eval PROCESS_NEXT=0) \
+ 	$(if $(wildcard $(addon)/addon_config.mk), \
+-		$(foreach var_line, $(subst $(space),?,$(shell cat $(addon)/addon_config.mk | tr '\n' '\t')), \
++		$(foreach var_line, $(shell cat $(addon)/addon_config.mk | tr '\n ' '\t?'), \
+ 			$(eval unscaped_var_line=$(strip $(subst ?, ,$(var_line)))) \
+ 			$(if $(filter $(PROCESS_NEXT),1), $(eval $(unscaped_var_line))) \
+ 			$(if $(filter %:,$(unscaped_var_line)), \
+diff --git a/scripts/ci/ccache.sh b/scripts/ci/ccache.sh
+index a6e663593c9..b49d738c100 100644
+--- a/scripts/ci/ccache.sh
++++ b/scripts/ci/ccache.sh
+@@ -20,9 +20,11 @@ EOF2
+     export CXX="$PWD/clang++.sh"
+     export CC="$PWD/clang.sh"
+ elif [ "$BUILDER" == "msys2" ]; then
+-    echo "detected msys setting ccache as env var"
+-    export CC="ccache /mingw32/bin/gcc"
+-    export CXX="ccache /mingw32/bin/g++"
++#    echo "detected msys setting ccache as env var"
++#    export CC="ccache /mingw32/bin/gcc"
++#    export CXX="ccache /mingw32/bin/g++"
++#    USE_CCACHE="USE_CCACHE=1"
++    echo "ccache is disable in MSYS2"
+ else
+ 	export PATH="/usr/lib/ccache:$PATH"
+ fi
+diff --git a/scripts/ci/msys2/build.sh b/scripts/ci/msys2/build.sh
+index d0f154ec043..24ce0d97eb0 100644
+--- a/scripts/ci/msys2/build.sh
++++ b/scripts/ci/msys2/build.sh
+@@ -5,15 +5,15 @@ source $ROOT/scripts/ci/ccache.sh
+ 
+ echo "**** Building OF core ****"
+ cd $ROOT/libs/openFrameworksCompiled/project
+-make USE_CCACHE=1 -j4 Debug
++make ${USE_CCACHE} -j4 Debug
+ 
+ echo "**** Building emptyExample ****"
+ cd $ROOT/scripts/templates/msys2
+-make USE_CCACHE=1 -j4 Debug
++make ${USE_CCACHE} -j4 Debug
+ 
+ echo "**** Building allAddonsExample ****"
+ cd $ROOT
+ cp scripts/templates/msys2/Makefile examples/templates/allAddonsExample/
+ cp scripts/templates/msys2/config.make examples/templates/allAddonsExample/
+ cd examples/templates/allAddonsExample/
+-make USE_CCACHE=1 -j4 Debug
++make ${USE_CCACHE} -j4 Debug
+diff --git a/scripts/ci/msys2/run_tests.sh b/scripts/ci/msys2/run_tests.sh
+index 843e7bce045..80868b000f3 100644
+--- a/scripts/ci/msys2/run_tests.sh
++++ b/scripts/ci/msys2/run_tests.sh
+@@ -12,7 +12,7 @@ for group in *; do
+ 				cd $test
+ 				cp ../../../scripts/templates/msys2/Makefile .
+ 				cp ../../../scripts/templates/msys2/config.make .
+-				make USE_CCACHE=1 -j4 Debug
++				make ${USE_CCACHE} -j4 Debug
+ 				cd bin
+ 				binname=$(basename ${test})
+                 #gdb -batch -ex "run" -ex "bt" -ex "q \$_exitcode" ./${binname}_debug

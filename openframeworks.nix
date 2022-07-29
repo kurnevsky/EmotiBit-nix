@@ -213,13 +213,13 @@ let
   };
 in stdenv.mkDerivation rec {
   pname = "openframeworks";
-  version = "0.11.2";
+  version = "0.11.0";
 
   src = fetchFromGitHub {
     owner = "openframeworks";
     repo = "openFrameworks";
     rev = version;
-    sha256 = "sha256-JeYHQRnV3GXqEd0LKeoBcxgcBNWErD6F66Tks3iW2q8=";
+    sha256 = "sha256-oLLpns6jTIoqGzUQBKAD5UoQNlyVCvA9JpeRkd021uo=";
   };
 
   nativeBuildInputs = [ pkg-config ];
@@ -264,6 +264,12 @@ in stdenv.mkDerivation rec {
         "https://github.com/openframeworks/openFrameworks/commit/290dbfc23930425024c9456b5c5519611fb1990d.patch";
       sha256 = "sha256-lgEEzRXgPMIjOF20SFq1iCjK3LfStkluY4Cd0MIHpbU=";
     })
+    (fetchpatch {
+      url =
+        "https://github.com/openframeworks/openFrameworks/commit/2bee6a395dba12839a5043e3a1f282e3fd7b24dd.patch";
+      sha256 = "sha256-JIDsWCWroqaa5woLF87fsFg3mq0H0U+Z1A+63VIBA18=";
+    })
+    ./make.patch # f23c71da938452cb42d4c0bfaef087afc26db82e
   ];
 
   postPatch = ''
