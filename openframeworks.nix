@@ -268,8 +268,8 @@ let
     src = fetchFromGitHub {
       owner = "EmotiBit";
       repo = "ofxEmotiBit";
-      rev = "867b0b16ac50c967fdc8c1bf05f003b32ae12667";
-      sha256 = "sha256-0sBhvyGxsrIN3ABDsWtQ1qO7O5pMVdkU6egP5wN9WrI=";
+      rev = "32c2e83e67f452b1afff575932f392e19bdcadcc";
+      sha256 = "sha256-pa5f71bR41HSI23UnF6J1doSpQlEhYbMtQWSDW7mcYk=";
     };
 
     buildPhase = "true";
