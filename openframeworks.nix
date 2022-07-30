@@ -1,7 +1,7 @@
 { stdenv, pkg-config, fetchFromGitHub, cairo, gst_all_1, systemd, libsndfile
 , openal, curl, pulseaudio, alsa-lib, libGL, libGLU, glew, glm, utf8cpp, boost
 , pugixml, uriparser, kissfft, rtaudio, freeimage, freeglut, glfw, libX11
-, libXrandr, nlohmann_json, jsoncpp, fetchpatch }:
+, libXrandr, nlohmann_json, jsoncpp, poco, fetchpatch }:
 
 let
   libtess2 = stdenv.mkDerivation rec {
@@ -254,6 +254,7 @@ in stdenv.mkDerivation rec {
     libX11
     libXrandr
     nlohmann_json
+    poco
     # ofxJSON
     jsoncpp
   ];
