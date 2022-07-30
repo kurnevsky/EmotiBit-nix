@@ -14,6 +14,7 @@
       devShell.x86_64-linux = pkgs.mkShell {
         buildInputs = with pkgs; [
           (callPackage ./openframeworks.nix { })
+          (callPackage ./arduino-fwuploader.nix { })
           bossa
         ];
       };
