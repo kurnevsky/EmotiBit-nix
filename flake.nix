@@ -15,6 +15,7 @@
         buildInputs = with pkgs; [
           (callPackage ./openframeworks.nix { })
           (callPackage ./arduino-fwuploader.nix { })
+          (callPackage ./firmware-uploader.nix { })
           bossa
         ];
       };
