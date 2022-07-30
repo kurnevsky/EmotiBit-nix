@@ -12,7 +12,10 @@
     let pkgs = nixpkgs.legacyPackages.x86_64-linux;
     in {
       devShell.x86_64-linux = pkgs.mkShell {
-        buildInputs = [ (pkgs.callPackage ./openframeworks.nix { }) ];
+        buildInputs = with pkgs; [
+          (callPackage ./openframeworks.nix { })
+          bossa
+        ];
       };
     };
 }
