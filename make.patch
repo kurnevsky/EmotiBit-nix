@@ -1,17 +1,3 @@
-From f23c71da938452cb42d4c0bfaef087afc26db82e Mon Sep 17 00:00:00 2001
-From: Olivier XILLO <oxillo@users.noreply.github.com>
-Date: Mon, 13 Apr 2020 19:36:02 +0200
-Subject: [PATCH] Merge make43 msys2ccache (#6566)
-
-[changelog] [makefiles]
----
- .appveyor.yml                                         | 11 -----------
- .../project/makefileCommon/config.addons.mk           |  2 +-
- scripts/ci/ccache.sh                                  |  8 +++++---
- scripts/ci/msys2/build.sh                             |  6 +++---
- scripts/ci/msys2/run_tests.sh                         |  2 +-
- 5 files changed, 10 insertions(+), 19 deletions(-)
-
 diff --git a/libs/openFrameworksCompiled/project/makefileCommon/config.addons.mk b/libs/openFrameworksCompiled/project/makefileCommon/config.addons.mk
 index 1566d47eba7..4b38a3dd8cd 100644
 --- a/libs/openFrameworksCompiled/project/makefileCommon/config.addons.mk

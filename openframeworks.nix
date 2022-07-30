@@ -1,7 +1,8 @@
 { stdenv, pkg-config, fetchFromGitHub, cairo, gst_all_1, systemd, libsndfile
 , openal, curl, pulseaudio, alsa-lib, libGL, libGLU, glew, glm, utf8cpp, boost
 , pugixml, uriparser, kissfft, rtaudio, freeimage, freeglut, glfw, libX11
-, libXrandr, nlohmann_json, jsoncpp, poco, fetchpatch }:
+, libXrandr, nlohmann_json, jsoncpp, poco, libXxf86vm, libXcursor, libXinerama
+, libXi, fetchpatch, cmake }:
 
 let
   libtess2 = stdenv.mkDerivation rec {
@@ -34,6 +35,23 @@ let
 
       runHook postInstall
     '';
+  };
+  liblsl = stdenv.mkDerivation rec {
+    pname = "liblsl";
+    version = "1.14.0";
+
+    src = fetchFromGitHub {
+      owner = "sccn";
+      repo = "liblsl";
+      rev = "v${version}";
+      sha256 = "sha256-/YLtmVvhzn1AFagRDQE+lwNyLaxRul2klWVrwynsMSo=";
+    };
+
+    patches = [
+      ./liblsl.patch # e16db0524f52ee74288f313d63f361e2499fda26
+    ];
+
+    nativeBuildInputs = [ cmake ];
   };
   ofxNetworkUtils = stdenv.mkDerivation rec {
     pname = "ofxNetworkUtils";
@@ -210,6 +228,15 @@ let
 
       runHook postInstall
     '';
+
+    # TODO: move libtess2/kissfft to openframeworks flags
+    postPatch = ''
+      rm EmotiBitOscilloscope/bin/liblsl-1.14.0-manylinux2010_x64.so
+      rm EmotiBitOscilloscope/bin/lsl.dll
+
+      substituteInPlace EmotiBitOscilloscope/config.make \
+        --replace 'PROJECT_LDFLAGS=-Wl,-rpath=./libs,./bin/liblsl-1.14.0-manylinux2010_x64.so' 'PROJECT_LDFLAGS=-ltess -lkissfft-double -llsl'
+    '';
   };
 in stdenv.mkDerivation rec {
   pname = "openframeworks";
@@ -255,8 +282,14 @@ in stdenv.mkDerivation rec {
     libXrandr
     nlohmann_json
     poco
+    libXxf86vm
+    libXcursor
+    libXinerama
+    libXi
     # ofxJSON
     jsoncpp
+    # ofxLSL
+    liblsl
   ];
 
   patches = [
@@ -314,6 +347,7 @@ in stdenv.mkDerivation rec {
     make
 
     cd $srcdir/addons/ofxEmotiBit/EmotiBitOscilloscope
+    export LDFLAGS="-L${libtess2}/lib"
     make
 
     runHook postBuild

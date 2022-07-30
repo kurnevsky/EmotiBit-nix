@@ -1,0 +1,15 @@
+diff --git a/src/sample.h b/src/sample.h
+index 4732ef8e6..250ca62c7 100644
+--- a/src/sample.h
++++ b/src/sample.h
+@@ -6,6 +6,10 @@
+ #include <boost/smart_ptr/intrusive_ptr.hpp>
+ #include <boost/static_assert.hpp>
+ #include <iosfwd>
++#include <limits>
++#include <stdexcept>
++#include <string>
++#include <type_traits>
+ 
+ #ifndef BOOST_BYTE_ORDER
+ #if BOOST_ENDIAN_BIG_BYTE
