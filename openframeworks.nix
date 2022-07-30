@@ -2,7 +2,7 @@
 , openal, curl, pulseaudio, alsa-lib, libGL, libGLU, glew, glm, utf8cpp, boost
 , pugixml, uriparser, kissfft, rtaudio, freeimage, freeglut, glfw, libX11
 , libXrandr, nlohmann_json, jsoncpp, poco, libXxf86vm, libXcursor, libXinerama
-, libXi, fetchpatch, cmake }:
+, libXi, fetchpatch, cmake, bossa }:
 
 let
   libtess2 = stdenv.mkDerivation rec {
@@ -163,6 +163,60 @@ let
       runHook postInstall
     '';
   };
+  ofxSerial = stdenv.mkDerivation rec {
+    pname = "ofxSerial";
+    version = "1";
+
+    src = fetchFromGitHub {
+      owner = "bakercp";
+      repo = "ofxSerial";
+      rev = "7a02ff97c02fdd038e367806128415ed794e48c7";
+      sha256 = "sha256-dr6Xw5t4EGt63d2uXRBL+FIqVT0FVNVoGcKj0l5qF7c=";
+    };
+
+    buildPhase = "true";
+
+    installPhase = ''
+      runHook preInstall
+
+      mkdir -p $out
+      cp -r * $out
+
+      runHook postInstall
+    '';
+
+    postPatch = ''
+      substituteInPlace libs/ofxSerial/include/ofx/IO/SerialDevice.h \
+        --replace '#include "json.hpp"' '#include "nlohmann/json.hpp"'
+    '';
+  };
+  ofxIO = stdenv.mkDerivation rec {
+    pname = "ofxIO";
+    version = "1";
+
+    src = fetchFromGitHub {
+      owner = "bakercp";
+      repo = "ofxIO";
+      rev = "9b55d4b3f5006c427947076270c92ba0dd706409";
+      sha256 = "sha256-uaNiY4gIEfqsocdRaY7lPScrZt3zL8t50WB9nXZ9QKU=";
+    };
+
+    buildPhase = "true";
+
+    installPhase = ''
+      runHook preInstall
+
+      mkdir -p $out
+      cp -r * $out
+
+      runHook postInstall
+    '';
+
+    postPatch = ''
+      substituteInPlace src/ofxIO.h \
+        --replace '#include "json.hpp"' '#include "nlohmann/json.hpp"'
+    '';
+  };
   ofxLSL = stdenv.mkDerivation rec {
     pname = "ofxLSL";
     version = "1";
@@ -236,6 +290,12 @@ let
 
       substituteInPlace EmotiBitOscilloscope/config.make \
         --replace 'PROJECT_LDFLAGS=-Wl,-rpath=./libs,./bin/liblsl-1.14.0-manylinux2010_x64.so' 'PROJECT_LDFLAGS=-ltess -lkissfft-double -llsl'
+
+      substituteInPlace EmotiBitFirmwareInstaller/config.make \
+        --replace '# PROJECT_LDFLAGS=-Wl,-rpath=./libs' 'PROJECT_LDFLAGS=-ltess -lkissfft-double -llsl'
+
+      substituteInPlace EmotiBitFirmwareInstaller/src/ofApp.cpp \
+        --replace 'command = "bossac";' 'command = "${bossa}/bin/bossac";'
     '';
   };
 in stdenv.mkDerivation rec {
@@ -336,6 +396,10 @@ in stdenv.mkDerivation rec {
     chmod -R +w $srcdir/addons/ofxThreadedLogger
     cp -r ${ofxBiquadFilter} $srcdir/addons/ofxBiquadFilter
     chmod -R +w $srcdir/addons/ofxBiquadFilter
+    cp -r ${ofxSerial} $srcdir/addons/ofxSerial
+    chmod -R +w $srcdir/addons/ofxSerial
+    cp -r ${ofxIO} $srcdir/addons/ofxIO
+    chmod -R +w $srcdir/addons/ofxIO
     cp -r ${ofxLSL} $srcdir/addons/ofxLSL
     chmod -R +w $srcdir/addons/ofxLSL
     cp -r ${EmotiBit_XPlat_Utils} $srcdir/addons/EmotiBit_XPlat_Utils
@@ -347,7 +411,9 @@ in stdenv.mkDerivation rec {
     make
 
     cd $srcdir/addons/ofxEmotiBit/EmotiBitOscilloscope
-    export LDFLAGS="-L${libtess2}/lib"
+    make
+
+    cd $srcdir/addons/ofxEmotiBit/EmotiBitFirmwareInstaller
     make
 
     runHook postBuild
@@ -359,6 +425,10 @@ in stdenv.mkDerivation rec {
     mkdir -p $out
     cp -r $srcdir/libs $out
     cp -r $srcdir/addons $out
+
+    mkdir -p $out/bin
+    ln -s $out/addons/ofxEmotiBit/EmotiBitOscilloscope/bin/EmotiBitOscilloscope $out/bin
+    ln -s $out/addons/ofxEmotiBit/EmotiBitFirmwareInstaller/bin/EmotiBitFirmwareInstaller $out/bin
 
     runHook postInstall
   '';
