@@ -2,7 +2,7 @@
 , openal, curl, pulseaudio, alsa-lib, libGL, libGLU, glew, glm, utf8cpp, boost
 , pugixml, uriparser, kissfft, rtaudio, freeimage, freeglut, glfw, libX11
 , libXrandr, nlohmann_json, jsoncpp, poco, libXxf86vm, libXcursor, libXinerama
-, libXi, fetchpatch, cmake, bossa }:
+, libXi, fetchpatch, cmake, bossa, inetutils }:
 
 let
   libtess2 = stdenv.mkDerivation rec {
@@ -296,6 +296,15 @@ let
 
       substituteInPlace EmotiBitFirmwareInstaller/src/ofApp.cpp \
         --replace 'command = "bossac";' 'command = "${bossa}/bin/bossac";'
+
+      substituteInPlace src/EmotiBitWiFiHost.cpp \
+        --replace 'string commandResult = ofSystem("ipconfig");' 'string commandResult = ofSystem("${inetutils}/bin/ipconfig");' \
+        --replace 'pos = commandResult.find("inet ", pos);' 'pos = commandResult.find("inet addr:", pos);' \
+        --replace 'int pos2 = commandResult.find("netmask", pos);' 'int pos2 = commandResult.find(" ", pos + 10);' \
+        --replace 'string ip = commandResult.substr(pos + 5, pos2 - pos - 6);' 'string ip = commandResult.substr(pos + 10, pos2 - pos - 11);'
+
+      substituteInPlace EmotiBitOscilloscope/src/ofApp.cpp \
+        --replace 'checkLatestSwVersion();' '\'
     '';
   };
 in stdenv.mkDerivation rec {
